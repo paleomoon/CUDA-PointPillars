@@ -1,0 +1,13 @@
+**__pycache__**
+**build**
+**egg-info**
+**dist**
+*.pyc
+venv/
+*.idea/
+*.so
+*.pth
+*.pkl
+*.zip
+*.onnx
+!model/

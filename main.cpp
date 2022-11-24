@@ -167,7 +167,7 @@ int main(int argc, const char **argv)
     buffer.reset((char *)data);
 
     float* points = (float*)buffer.get();
-    size_t points_size = length/sizeof(float)/4;
+    size_t points_size = length/sizeof(float)/4; //点的数量，每个点(x,y,z,r)
 
     std::cout << "find points num: "<< points_size <<std::endl;
 

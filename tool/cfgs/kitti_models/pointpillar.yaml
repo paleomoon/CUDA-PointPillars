@@ -2,7 +2,7 @@ CLASS_NAMES: ['Car', 'Pedestrian', 'Cyclist']
 
 DATA_CONFIG: 
     _BASE_CONFIG_: cfgs/dataset_configs/kitti_dataset.yaml
-    POINT_CLOUD_RANGE: [0, -39.68, -3, 69.12, 39.68, 1]
+    POINT_CLOUD_RANGE: [0, -39.68, -3, 69.12, 39.68, 1] # xyz的最小值和最大值，因为距离太远点会过于稀疏，所以需要取一个范围。因为车的后方没有标注数据，所以x大于0.
     DATA_PROCESSOR:
         - NAME: mask_points_and_boxes_outside_range
           REMOVE_OUTSIDE_BOXES: True
@@ -14,8 +14,8 @@ DATA_CONFIG:
           }
 
         - NAME: transform_points_to_voxels
-          VOXEL_SIZE: [0.16, 0.16, 4]
-          MAX_POINTS_PER_VOXEL: 32
+          VOXEL_SIZE: [0.16, 0.16, 4] # 每个pillar长宽高
+          MAX_POINTS_PER_VOXEL: 32 # 每个pillar中的最大点云数量是32，如果一个pillar中的点云数量超过32,那么就会随机采样32个点；如果一个pillar中的点云数量少于32，那么会对这个pillar使用0样本填充。
           MAX_NUMBER_OF_VOXELS: {
             'train': 16000,
             'test': 40000
@@ -50,69 +50,69 @@ DATA_CONFIG:
 MODEL:
     NAME: PointPillar
 
-    VFE:
-        NAME: PillarVFE
+    VFE: # voxel feture extraction
+        NAME: PillarVFE # pcdet/models/backbones_3d/vfe/pillar_vfe.py
         WITH_DISTANCE: False
         USE_ABSLOTE_XYZ: True
         USE_NORM: True
         NUM_FILTERS: [64]
 
-    MAP_TO_BEV:
-        NAME: PointPillarScatter
+    MAP_TO_BEV: # 转换为BEV伪图像
+        NAME: PointPillarScatter # pcdet/models/backbones_2d/map_to_bev/pointpillar_scatter.py
         NUM_BEV_FEATURES: 64
 
-    BACKBONE_2D:
-        NAME: BaseBEVBackbone
+    BACKBONE_2D: # 使用2D backbone提取伪图像特征
+        NAME: BaseBEVBackbone # pcdet/models/backbones_2d/base_bev_backbone.py
         LAYER_NUMS: [3, 5, 5]
         LAYER_STRIDES: [2, 2, 2]
         NUM_FILTERS: [64, 128, 256]
         UPSAMPLE_STRIDES: [1, 2, 4]
         NUM_UPSAMPLE_FILTERS: [128, 128, 128]
 
-    DENSE_HEAD:
-        NAME: AnchorHeadSingle
+    DENSE_HEAD: # 检测头
+        NAME: AnchorHeadSingle # pcdet/models/dense_heads/anchor_head_single.py
         CLASS_AGNOSTIC: False
 
-        USE_DIRECTION_CLASSIFIER: True
-        DIR_OFFSET: 0.78539
+        USE_DIRECTION_CLASSIFIER: True # 方向分为0和90度两类
+        DIR_OFFSET: 0.78539 # 方向偏移量 π/4
         DIR_LIMIT_OFFSET: 0.0
         NUM_DIR_BINS: 2
 
         ANCHOR_GENERATOR_CONFIG: [
             {
                 'class_name': 'Car',
-                'anchor_sizes': [[3.9, 1.6, 1.56]],
-                'anchor_rotations': [0, 1.57],
-                'anchor_bottom_heights': [-1.78],
+                'anchor_sizes': [[3.9, 1.6, 1.56]], # Car anchor，单位米
+                'anchor_rotations': [0, 1.57], # anchor的两种角度0度和90度，π/2=1.57弧度
+                'anchor_bottom_heights': [-1.78], # 底高度
                 'align_center': False,
                 'feature_map_stride': 2,
-                'matched_threshold': 0.6,
+                'matched_threshold': 0.6, # 车匹配iou阈值大于等于0.65为正样本，小于0.45为负样本，中间的不计算损失
                 'unmatched_threshold': 0.45
             },
             {
                 'class_name': 'Pedestrian',
-                'anchor_sizes': [[0.8, 0.6, 1.73]],
+                'anchor_sizes': [[0.8, 0.6, 1.73]], # Pedestrian anchor，单位米
                 'anchor_rotations': [0, 1.57],
                 'anchor_bottom_heights': [-0.6],
                 'align_center': False,
                 'feature_map_stride': 2,
-                'matched_threshold': 0.5,
+                'matched_threshold': 0.5, # 人匹配iou阈值大于等于0.5为正样本，小于0.35为负样本，中间的不计算损失。
                 'unmatched_threshold': 0.35
             },
             {
                 'class_name': 'Cyclist',
-                'anchor_sizes': [[1.76, 0.6, 1.73]],
+                'anchor_sizes': [[1.76, 0.6, 1.73]], # Cyclist anchor，单位米
                 'anchor_rotations': [0, 1.57],
                 'anchor_bottom_heights': [-0.6],
                 'align_center': False,
                 'feature_map_stride': 2,
-                'matched_threshold': 0.5,
+                'matched_threshold': 0.5, # 自行车匹配iou阈值大于等于0.5为正样本，小于0.35为负样本，中间的不计算损失。
                 'unmatched_threshold': 0.35
             }
         ]
 
         TARGET_ASSIGNER_CONFIG:
-            NAME: AxisAlignedTargetAssigner
+            NAME: AxisAlignedTargetAssigner # pcdet/models/dense_heads/target_assigner/axis_aligned_target_assigner.py
             POS_FRACTION: -1.0
             SAMPLE_SIZE: 512
             NORM_BY_NUM_EXAMPLES: False

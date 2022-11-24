@@ -31,8 +31,8 @@ struct Bndbox {
     float w;
     float l;
     float h;
-    float rt;
-    int id;
+    float rt; //direction
+    int id; //class id
     float score;
     Bndbox(){};
     Bndbox(float x_, float y_, float z_, float w_, float l_, float h_, float rt_, int id_, float score_)
