@@ -46,7 +46,7 @@ __global__ void postprocess_kernal(const float *cls_input,
   }
   int col = loc_index % feature_x_size;
   int row = loc_index / feature_x_size;
-  float x_offset = min_x_range + col * (max_x_range - min_x_range) / (feature_x_size - 1);
+  float x_offset = min_x_range + col * (max_x_range - min_x_range) / (feature_x_size - 1);//？
   float y_offset = min_y_range + row * (max_y_range - min_y_range) / (feature_y_size - 1);
   int cls_offset = loc_index * num_anchors * num_classes + ith_anchor * num_classes;
   float dev_cls[2] = {-1, 0};
@@ -132,7 +132,7 @@ cudaError_t postprocess_launch(const float *cls_input,
                       cudaStream_t stream)
 {
   int bev_size = feature_x_size * feature_y_size;
-  dim3 threads (num_anchors);
+  dim3 threads (num_anchors); //一个线程处理一个anchor
   dim3 blocks (bev_size);
 
   postprocess_kernal<<<blocks, threads, 0, stream>>>

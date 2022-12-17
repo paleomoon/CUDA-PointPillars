@@ -224,9 +224,9 @@ int PointPillar::doinfer(void*points_data, unsigned int points_size, std::vector
   float generateVoxelsTime = 0.0f;
   checkCudaErrors(cudaEventRecord(start_, stream_));
 #endif
-
+  //generate voxels
   pre_->generateVoxels((float*)points_data, points_size,
-        params_input_,
+        params_input_, // pillar num
         voxel_features_, 
         voxel_num_,
         voxel_idxs_);
@@ -244,7 +244,7 @@ int PointPillar::doinfer(void*points_data, unsigned int points_size, std::vector
   float generateFeaturesTime = 0.0f;
   checkCudaErrors(cudaEventRecord(start_, stream_));
 #endif
-
+  // 4 channels -> 10 channels
   pre_->generateFeatures(voxel_features_,
       voxel_num_,
       voxel_idxs_,
@@ -262,6 +262,9 @@ int PointPillar::doinfer(void*points_data, unsigned int points_size, std::vector
   checkCudaErrors(cudaEventRecord(start_, stream_));
 #endif
 
+  //cls_output_: 类别置信度
+  //box_output_：带编码的3D框回归值
+  //dir_cls_output_: 方向
   void *buffers[] = {features_input_, voxel_idxs_, params_input_, cls_output_, box_output_, dir_cls_output_};
   trt_->doinfer(buffers);
   checkCudaErrors(cudaMemsetAsync(params_input_, 0, sizeof(unsigned int), stream_));
@@ -277,6 +280,7 @@ int PointPillar::doinfer(void*points_data, unsigned int points_size, std::vector
   checkCudaErrors(cudaEventRecord(start_, stream_));
 #endif
 
+  //结合设定的anchors生成真实的预测框
   post_->doPostprocessCuda(cls_output_, box_output_, dir_cls_output_,
                           bndbox_output_);
   checkCudaErrors(cudaDeviceSynchronize());
@@ -294,7 +298,8 @@ int PointPillar::doinfer(void*points_data, unsigned int points_size, std::vector
     res_.push_back(Bb);
   }
 
-
+  //nms
+  //将head和3dnms融合成一个plugin或许能够加速：https://blog.csdn.net/ChuiGeDaQiQiu/article/details/124059997
   nms_cpu(res_, params_.nms_thresh, nms_pred);
   res_.clear();
 

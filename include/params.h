@@ -41,7 +41,7 @@ class Params
     // the num of direction classes(bins), 0 or 90
     const int num_dir_bins = 2;
     // anchors decode by (x, y, z, dir)
-    static const int num_anchors = num_classes * 2;
+    static const int num_anchors = num_classes * 2; //每类两个大小相同方向不同的anchor：0° 90°
     static const int len_per_anchor = 4;
     const float anchors[num_anchors * len_per_anchor] = {
       3.9,1.6,1.56,0.0,
@@ -53,8 +53,8 @@ class Params
       };
     const float anchor_bottom_heights[num_classes] = {-1.78,-0.6,-0.6,};
     // the score threshold for classification
-    const float score_thresh = 0.1; # 分数阈值
-    const float nms_thresh = 0.01; # nms阈值
+    const float score_thresh = 0.1; // 分数阈值
+    const float nms_thresh = 0.01; // nms阈值
     const int max_num_pillars = MAX_VOXELS;
     const int pillarPoints_bev = max_num_points_per_pillar * max_num_pillars;
     // the detected boxes result decode by (x, y, z, w, l, h, yaw)

@@ -27,18 +27,18 @@ PreProcessCuda::PreProcessCuda(cudaStream_t stream)
   unsigned int mask_size = params_.grid_z_size
               * params_.grid_y_size
               * params_.grid_x_size
-              * sizeof(unsigned int);
+              * sizeof(unsigned int); //体素化后的网格占的内存字节，之后用来存储每个pillar点的个数
 
   unsigned int voxels_size = params_.grid_z_size
               * params_.grid_y_size
               * params_.grid_x_size
-              * params_.max_num_points_per_pillar
-              * params_.num_point_values
-              * sizeof(float);
+              * params_.max_num_points_per_pillar //32
+              * params_.num_point_values //4
+              * sizeof(float); //体素化后的数据占的内存字节
 
   checkCudaErrors(cudaMallocManaged((void **)&mask_, mask_size));
   checkCudaErrors(cudaMallocManaged((void **)&voxels_, voxels_size));
-  checkCudaErrors(cudaMallocManaged((void **)&voxelsList_, 300000l*sizeof(int)));
+  checkCudaErrors(cudaMallocManaged((void **)&voxelsList_, 300000l*sizeof(int))); //voxelsList_？TODO
 
   checkCudaErrors(cudaMemsetAsync(mask_, 0, mask_size, stream_));
   checkCudaErrors(cudaMemsetAsync(voxels_, 0, voxels_size, stream_));
@@ -55,6 +55,11 @@ PreProcessCuda::~PreProcessCuda()
   return;
 }
 
+/*
+体素化
+voxel_features (MAX_VOXELS,32,10)
+voxel_idxs  (MAX_VOXELS,4) 坐标 0,0,y,x
+*/
 int PreProcessCuda::generateVoxels(float *points, size_t points_size,
         unsigned int *pillar_num,
         float *voxel_features,
@@ -64,7 +69,7 @@ int PreProcessCuda::generateVoxels(float *points, size_t points_size,
   int grid_x_size = params_.grid_x_size;
   int grid_y_size = params_.grid_y_size;
   int grid_z_size = params_.grid_z_size;
-  assert(grid_z_size ==1);
+  assert(grid_z_size ==1); //z恒等于1
   float min_x_range = params_.min_x_range;
   float max_x_range = params_.max_x_range;
   float min_y_range = params_.min_y_range;
