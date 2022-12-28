@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8.7)
+project(cpu_test)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g -ggdb")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -ggdb")
+add_compile_options(-std=c++11)
+add_executable(${PROJECT_NAME} main.cpp preprocess.cpp postprocess.cpp)

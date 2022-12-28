@@ -11,3 +11,5 @@ venv/
 *.zip
 *.onnx
 !model/
+cpu_test/build
+model_test/*.pth

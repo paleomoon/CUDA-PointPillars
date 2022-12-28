@@ -5,6 +5,39 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: test forward",
+            "type": "python",
+            "request": "launch",
+            "program": "forward.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/model_test",
+            "justMyCode": true
+        },
+        {
+            "name": "cpu_test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cpu_test/build/cpu_test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/cpu_test/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "将反汇编风格设置为 Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "Python: export",
             "type": "python",
             "request": "launch",
@@ -13,7 +46,8 @@
             "justMyCode": true,
             "cwd": "tool",
             "args": [
-                "--ckpt", "pointpillar_7728.pth"
+                "--ckpt",
+                "pointpillar_7728.pth"
             ]
         }
     ]
